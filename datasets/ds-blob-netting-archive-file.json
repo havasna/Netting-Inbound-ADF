@@ -1,0 +1,19 @@
+{
+  "name": "ds-blob-netting-archive-file",
+  "properties": {
+    "linkedServiceName": { "referenceName": "ls-blob", "type": "LinkedServiceReference" },
+    "parameters": {
+      "folderPath": { "type": "String" },
+      "fileName": { "type": "String" },
+      "Container": { "type": "String", "defaultValue": "netting" }
+    },
+    "type": "Binary",
+    "typeProperties": {
+      "location": {
+        "type": "AzureBlobFSLocation",
+        "fileName": "@dataset().fileName",
+        "folderPath": "@dataset().folderPath"
+      }
+    }
+  }
+}

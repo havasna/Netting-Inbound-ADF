@@ -1,0 +1,16 @@
+{
+  "name": "ls-azureFunctionNetting",
+  "properties": {
+    "type": "Rest",
+    "typeProperties": {
+      "functionAppUrl": "https://YOUR_FUNCTION_APP.azurewebsites.net",
+      "enableServerCertificateValidation": true
+    },
+    "connectVia": {
+      "referenceName": "AutoResolveIntegrationRuntime",
+      "type": "IntegrationRuntimeReference"
+    },
+    "annotations": ["Azure Function for Netting processing"],
+    "parameters": {}
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "name": "pl-NettingInbound",
+  "properties": {
+    "annotations": ["Converted from SSIS Netting Inbound"],
+    "runtimeConfiguration": {
+      "pipelineExternalCompute": null
+    },
+    "parameters": {
+      "inputDirectory": { "type": "String", "defaultValue": "netting/input/" },
+      "archiveDirectory": { "type": "String", "defaultValue": "netting/archive/" },
+      "resultsDirectory": { "type": "String", "defaultValue": "netting/results/" },
+      "agressoInstance": { "type": "String", "defaultValue": "Agresso Production" },
+      "gl07Variant": { "type": "Int", "defaultValue": 403 }
+    },
+    "activities": [
+      {
+        "name": "GetFiles",
+        "type": "GetMetadata",
+        "typeProperties": {
+          "dataset": { "referenceName": "ds-blob-netting-input", "type": "DatasetReference" },
+          "fieldList": ["childItems"]
+        },
+        "policy": { "timeout": "1.00:00:00", "retry": 1, "retryIntervalInSeconds": 30 }
+      },
+      {
+        "name": "ForEachFile",
+        "type": "ForEach",
+        "dependsOn": [{ "activity": "GetFiles", "dependencyConditions": ["Succeeded"] }],
+        "typeProperties": {
+          "isSequential": true,
+          "items": "@activity('GetFiles').output.childItems",
+          "activities": [
+            {
+              "name": "ArchiveFile",
+              "type": "Copy",
+              "typeProperties": {
+                "source": { "type": "BinarySource" },
+                "sink": { "type": "BinarySink" },
+                "enableStaging": false
+              },
+              "inputs": [
+                {
+                  "referenceName": "ds-blob-netting-input-file",
+                  "type": "DatasetReference",
+                  "parameters": {
+                    "folderPath": "@pipeline().parameters.inputDirectory",
+                    "fileName": "@item().name"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "referenceName": "ds-blob-netting-archive-file",
+                  "type": "DatasetReference",
+                  "parameters": {
+                    "folderPath": "@pipeline().parameters.archiveDirectory",
+                    "fileName": "@item().name"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "ProcessNettingFile",
+              "type": "WebActivity",
+              "typeProperties": {
+                "url": "@concat(linkedService().ls-azureFunctionNetting.properties.typeProperties.functionAppUrl, '/api/ProcessNettingFile')",
+                "method": "POST",
+                "headers": { "Content-Type": "application/json" },
+                "body": {
+                  "FileName": "@item().name",
+                  "InputContainer": "@dataset().Container",
+                  "InputDirectory": "@pipeline().parameters.archiveDirectory",
+                  "ResultsDirectory": "@pipeline().parameters.resultsDirectory",
+                  "ArchiveDirectory": "@pipeline().parameters.archiveDirectory",
+                  "AgressoInstance": "@pipeline().parameters.agressoInstance",
+                  "Gl07Variant": "@pipeline().parameters.gl07Variant"
+                },
+                "authentication": { "type": "MSI", "resource": "https://management.azure.com/" }
+              },
+              "linkedServiceName": { "referenceName": "ls-azureFunctionNetting", "type": "LinkedServiceReference" }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

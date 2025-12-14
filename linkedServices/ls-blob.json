@@ -1,0 +1,16 @@
+{
+  "name": "ls-blob",
+  "properties": {
+    "annotations": [],
+    "type": "AzureBlobFS",
+    "typeProperties": {
+      "url": "https://YOUR_STORAGE_ACCOUNT.dfs.core.windows.net"
+    },
+    "connectVia": {
+      "referenceName": "AutoResolveIntegrationRuntime",
+      "type": "IntegrationRuntimeReference"
+    },
+    "description": "Azure Data Lake Storage Gen2 for Netting files",
+    "parameters": {}
+  }
+}

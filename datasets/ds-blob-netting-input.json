@@ -1,0 +1,15 @@
+{
+  "name": "ds-blob-netting-input",
+  "properties": {
+    "linkedServiceName": { "referenceName": "ls-blob", "type": "LinkedServiceReference" },
+    "annotations": [],
+    "type": "Binary",
+    "typeProperties": {
+      "location": {
+        "type": "AzureBlobFSLocation",
+        "folderPath": "@pipeline().parameters.inputDirectory"
+      }
+    },
+    "schema": []
+  }
+}
